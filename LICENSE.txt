@@ -1,0 +1,385 @@
+HULIGAN BROWSER BINARY — END-USER LICENSE AGREEMENT
+===================================================
+
+Version 1.1 — Last updated 2026-05-14
+
+This End-User License Agreement ("Agreement") is a legal contract
+between you (an individual or legal entity, "You") and the Huligan
+Project ("Licensor"), the maintainer and copyright holder of the
+patched Chromium binary distributed through this repository, governing
+your use of that binary and any related release artifacts (the
+"Binary").
+
+By downloading, installing, executing, or otherwise using the Binary,
+You agree to be bound by this Agreement. If You do not agree, do not
+download, install, or use the Binary.
+
+This Agreement applies to each download of the Binary as of the
+version of this Agreement in force at the time of that download.
+Licensor may publish a new version of this Agreement at any time by
+updating this file in the huligan-releases repository. New versions
+apply only to downloads occurring after they are published; prior
+downloads remain governed by the version of this Agreement in effect
+when they occurred.
+
+This Agreement is presented in English. Any translation provided in
+this repository is for convenience only; the English version controls
+in case of conflict.
+
+
+1. DEFINITIONS
+--------------
+
+"Binary" means the compiled patched Chromium executable and all
+accompanying files distributed by Licensor through the
+huligan-releases repository (https://github.com/S1d18/huligan-releases),
+including all archives, checksums, manifests, and assets attached to
+any release tag.
+
+"Patches" means the source-code-level modifications, configurations,
+and additions made by Licensor to upstream Chromium that distinguish
+the Binary from a stock Chromium build. The Patches themselves are
+the proprietary property of Licensor and are not made available in
+source form by this Agreement.
+
+"Licensor" means the Huligan Project, the individuals and entities
+contributing to it, and their successors. No legal-entity
+representation is hereby made about the structure of the Huligan
+Project; this Agreement is enforceable against and by the natural
+person(s) acting as Licensor of record at the time of dispute.
+
+"You" means the individual or legal entity exercising rights under
+this Agreement.
+
+"Legal Contact" means the email address designated for legal notices
+under this Agreement, currently set to the placeholder address listed
+in this repository's README. Licensor will update the README with the
+operative address before this Agreement is enforced against any
+recipient.
+
+
+2. LICENSE GRANT
+----------------
+
+Subject to Your continued compliance with every term of this
+Agreement, Licensor grants You a worldwide, non-exclusive, non-
+transferable, non-sublicensable, revocable, royalty-free license to:
+
+  (a) download, install, and execute the Binary on hardware You own
+      or lawfully control;
+
+  (b) use the Binary internally for personal use, commercial use,
+      research, testing, development, automation, and content
+      verification;
+
+  (c) integrate the Binary into Your own workflows and tools that You
+      operate, provided the Binary is not redistributed to third
+      parties as part of those workflows or tools.
+
+No right to modify the Binary, prepare derivative works of the Binary,
+or sublicense the Binary is granted by this Agreement.
+
+The Apache 2.0 license that governs the Huligan SDK (a separate
+component) does NOT govern the Binary. The Binary's terms are
+exclusively defined by this Agreement.
+
+
+3. RESTRICTIONS
+---------------
+
+You shall not, and shall not permit any third party to:
+
+  (a) Redistribute, mirror, publish, repackage, sublicense, sell,
+      rent, lease, lend, or otherwise make the Binary available to
+      any third party, whether modified or unmodified, whether for a
+      fee or free of charge, except as expressly permitted by Section
+      4 (Bundling Exception).
+
+      For clarity: copying the Binary between hardware that You own
+      or lawfully control (for example, between Your laptop and Your
+      server) is not "Redistribution" under this Section, provided no
+      copy is made available to any third party.
+
+  (b) Use the Binary, or any portion of it, to build, operate, or
+      offer a software-as-a-service ("SaaS"), platform-as-a-service,
+      browser-as-a-service, scraping-as-a-service, or any commercial
+      service in which third parties access browser functionality
+      derived from the Binary, without first obtaining a separate
+      written commercial license from Licensor;
+
+  (c) Reverse engineer, decompile, disassemble, extract the Patches
+      from, diff against unmodified Chromium for the purpose of
+      recovering the Patches, or otherwise attempt to derive the
+      source-code-level modifications applied to the Binary, except
+      to the limited extent such activity is permitted by applicable
+      law that cannot be excluded by contract (e.g. interoperability
+      rights under EU Directive 2009/24/EC), and only after providing
+      Licensor with thirty (30) days' prior written notice to the
+      Legal Contact;
+
+  (d) Remove, alter, or obscure any copyright, trademark,
+      attribution, license, or proprietary notice contained in or
+      displayed by the Binary;
+
+  (e) Use the Binary in any manner that violates applicable law,
+      including but not limited to laws governing computer fraud,
+      unauthorized access, intellectual-property infringement, fraud,
+      identity theft, or sanctions;
+
+  (f) Use the Binary to harass, defame, defraud, deceive, harm, or
+      impersonate any person or entity in violation of applicable
+      law;
+
+  (g) Use the Binary, any portion of it, or any disassembly,
+      decompilation, diff, or other derived analysis of it to train,
+      fine-tune, distill, or otherwise inform any machine-learning
+      model, dataset, or programmatic system designed to clone,
+      replicate, or substitute for the Binary's anti-detection
+      functionality.
+
+      For clarity, this restriction does not prohibit using the
+      Binary as a tool to lawfully scrape, render, or interact with
+      third-party websites whose content is then used to train
+      models, provided that the model is not trained to clone the
+      Binary itself;
+
+  (h) Claim authorship of, or material contribution to, the Binary
+      or to the underlying patched Chromium codebase;
+
+  (i) Download, install, or use the Binary if You are located in, or
+      are a resident or national of, any country, region, or
+      jurisdiction subject to comprehensive U.S., E.U., U.K., or U.N.
+      trade sanctions (including, as of the date of this Agreement,
+      North Korea, Cuba, Iran, Syria, and the Crimea, Donetsk,
+      Luhansk, Kherson, and Zaporizhzhia regions of Ukraine), or if
+      You are listed on, or beneficially owned by anyone listed on,
+      the U.S. Treasury Department's Specially Designated Nationals
+      and Blocked Persons List, the U.S. Department of Commerce's
+      Entity List, or any equivalent list maintained by the E.U.,
+      U.K., or U.N.
+
+
+4. BUNDLING EXCEPTION (Personal & Internal Use)
+-----------------------------------------------
+
+You may include the Binary in Your own personal or internal-use
+software bundles, provided that:
+
+  (a) the software bundle is used only by You or by employees,
+      contractors, or members of Your organization;
+
+  (b) the software bundle is not offered, sold, or made available to
+      external third parties;
+
+  (c) this Agreement is reproduced or referenced in the bundle's
+      documentation;
+
+  (d) the Binary itself is not modified.
+
+"Employees, contractors, and members of Your organization" means
+natural persons acting under Your direction or for Your benefit who
+are bound by confidentiality obligations at least as protective as
+those in this Agreement. Customers, end-users, partners, resellers,
+licensees, or any party to whom Your bundle is offered as a service
+are not "members of Your organization."
+
+Any bundling or distribution outside the scope of this exception
+requires a separate commercial license. Contact Licensor at the
+Legal Contact for terms.
+
+
+5. UPDATES AND VERSIONS
+-----------------------
+
+Licensor may release new versions of the Binary at its sole
+discretion. This Agreement governs each version You download. New
+versions may add features, remove features, or change behavior
+without notice. Licensor is under no obligation to maintain, support,
+patch, or backport the Binary, including security fixes.
+
+
+6. NO WARRANTY
+--------------
+
+THE BINARY IS PROVIDED "AS IS" AND "AS AVAILABLE", WITHOUT WARRANTY
+OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
+ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE, TITLE, NON-INFRINGEMENT, ACCURACY, OR THAT THE BINARY WILL
+BE UNINTERRUPTED, ERROR-FREE, SECURE, OR FREE OF MALICIOUS CODE.
+
+You acknowledge that the Binary is a derivative of the Chromium open-
+source project and that Chromium is itself provided "AS IS" by its
+upstream authors. Licensor makes no representation that the Binary
+remains undetected by any anti-bot, anti-fraud, or fingerprint-based
+detection system, now or in the future. Detection-bypass behavior
+may degrade or fail without notice as third parties update their
+techniques.
+
+
+7. LIMITATION OF LIABILITY
+--------------------------
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT WILL
+LICENSOR, ITS CONTRIBUTORS, OR THEIR AFFILIATES BE LIABLE TO YOU FOR
+ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY,
+PUNITIVE, OR LOST-PROFITS DAMAGES ARISING OUT OF OR RELATED TO THE
+BINARY OR THIS AGREEMENT, INCLUDING WITHOUT LIMITATION DAMAGES FOR
+LOST DATA, ACCOUNT TERMINATION, FINANCIAL LOSS, BUSINESS
+INTERRUPTION, OR LOSS OF GOODWILL, EVEN IF LICENSOR HAS BEEN ADVISED
+OF THE POSSIBILITY OF SUCH DAMAGES.
+
+LICENSOR'S TOTAL CUMULATIVE LIABILITY ARISING OUT OF OR RELATED TO
+THIS AGREEMENT WILL NOT EXCEED THE GREATER OF (i) THE AMOUNT YOU
+ACTUALLY PAID LICENSOR FOR THE BINARY IN THE TWELVE (12) MONTHS
+IMMEDIATELY PRECEDING THE EVENT GIVING RISE TO LIABILITY, OR (ii)
+ONE HUNDRED U.S. DOLLARS (USD 100.00).
+
+Nothing in this Agreement limits or excludes liability that, under
+applicable mandatory law, cannot be limited or excluded — including
+liability for death or personal injury caused by Licensor's
+negligence, fraud, fraudulent misrepresentation, or any other
+liability which by law may not be excluded or limited.
+
+
+8. INDEMNIFICATION
+------------------
+
+You agree to indemnify, defend, and hold harmless Licensor and its
+contributors from any claim, demand, loss, damage, liability, cost,
+or expense (including reasonable attorneys' fees) arising out of or
+related to (a) Your use of the Binary in violation of this
+Agreement; (b) Your violation of applicable law in connection with
+the Binary; or (c) Your infringement of any third-party right
+through Your use of the Binary.
+
+
+9. THIRD-PARTY COMPONENTS
+-------------------------
+
+The Binary is derived from the Chromium project (Copyright The
+Chromium Authors, BSD-3-Clause license) and includes third-party
+code under multiple compatible licenses (BSD, Apache 2.0, MIT, LGPL,
+MPL, and others) as documented by upstream Chromium at
+https://chromium.googlesource.com/chromium/src/+/refs/heads/main/LICENSE
+and through the in-binary "chrome://credits" page. Each such third-
+party component remains under its own license.
+
+For each Release of the Binary, Licensor will, upon written request
+received within three (3) years of the Release date, provide the
+complete corresponding upstream source code for any LGPL-licensed
+component and any MPL-licensed component contained in that Release,
+at no charge other than reasonable cost of media and delivery.
+Requests must be sent to the Legal Contact and must identify the
+Release version and the component(s) requested. Source will be
+delivered as a downloadable archive within sixty (60) days of receipt
+of a valid request.
+
+
+10. TERMINATION
+---------------
+
+This Agreement is effective until terminated. Your rights under this
+Agreement terminate automatically and without notice if You fail to
+comply with any term. Upon termination, You must cease all use of
+the Binary and delete all copies in Your possession or control.
+
+Sections 1 (Definitions), 3 (Restrictions), 6 (No Warranty), 7
+(Limitation of Liability), 8 (Indemnification), 9 (Third-Party
+Components), 10 (this Section), 11 (No Trademark or Patent Grant),
+12 (Force Majeure), and 13 (General) survive termination.
+
+
+11. NO TRADEMARK OR PATENT GRANT
+--------------------------------
+
+"Huligan", the Huligan logo, and all related word marks and design
+marks are unregistered common-law trademarks of the Huligan Project.
+No license to use any trademark of Licensor is granted by this
+Agreement, except for the limited descriptive use required to
+identify the origin of the Binary in accurate, factual statements
+(for example: "built on Huligan Browser"). Use of "Huligan" in
+product naming, marketing of derivative products, or branding of
+services requires Licensor's prior written consent.
+
+No patent license is granted by this Agreement, except as expressly
+required to use the Binary for its intended purpose under the terms
+of Section 2.
+
+
+12. FORCE MAJEURE
+-----------------
+
+Neither party will be liable for any failure or delay in performance
+caused by circumstances beyond its reasonable control, including
+acts of war, terrorism, civil unrest, natural disasters, pandemics,
+government action, internet or hosting-provider outages, cyber
+attacks, or denial-of-service events. Obligations to make payment
+are not excused by this Section.
+
+
+13. GENERAL
+-----------
+
+(a) Governing law and dispute resolution.
+
+    This Agreement is governed by the substantive laws of the
+    Republic of Cyprus, without regard to its conflict-of-laws
+    provisions. The United Nations Convention on Contracts for the
+    International Sale of Goods does not apply.
+
+    Any dispute, controversy, or claim arising out of or in
+    connection with this Agreement, including its existence,
+    validity, interpretation, performance, breach, or termination,
+    shall be finally and exclusively resolved by binding arbitration
+    administered by the International Chamber of Commerce ("ICC")
+    under the ICC Rules of Arbitration then in effect. The number of
+    arbitrators shall be one (1). The seat of arbitration shall be
+    Nicosia, Cyprus. The language of the arbitration shall be
+    English. Judgment on the arbitral award may be entered in any
+    court of competent jurisdiction.
+
+    Notwithstanding the foregoing, Licensor may bring an action for
+    injunctive or other equitable relief in any court of competent
+    jurisdiction to protect its intellectual-property rights pending
+    completion of arbitration.
+
+(b) Entire agreement. This Agreement is the entire agreement between
+    You and Licensor regarding the Binary and supersedes any prior
+    or contemporaneous communications.
+
+(c) Severability. If any provision of this Agreement is held
+    unenforceable, the remaining provisions remain in full effect,
+    and the unenforceable provision shall be reformed to the
+    minimum extent necessary to make it enforceable while preserving
+    the parties' intent.
+
+(d) No waiver. Failure by Licensor to enforce any provision is not
+    a waiver of future enforcement.
+
+(e) Assignment. You may not assign this Agreement without Licensor's
+    prior written consent. Licensor may assign this Agreement freely.
+
+(f) Notices. Notices to Licensor must be delivered in writing by
+    email to the Legal Contact. Notices are deemed received on the
+    next business day after a properly-formatted email is sent to a
+    working address. Postal notices are not accepted.
+
+(g) Reservation. All rights not expressly granted are reserved by
+    Licensor.
+
+(h) Class action waiver. To the extent permitted by applicable law,
+    all disputes shall be resolved on an individual basis only. You
+    waive any right to participate in a class action, collective
+    action, or representative proceeding against Licensor. This
+    waiver does not apply where prohibited by mandatory law.
+
+(i) No agency. Nothing in this Agreement creates a partnership,
+    joint venture, agency, or employment relationship between You
+    and Licensor.
+
+(j) Headings. Section headings are for convenience only and do not
+    affect interpretation.
+
+
+END OF AGREEMENT
+================
