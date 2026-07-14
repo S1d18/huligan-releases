@@ -1,0 +1,31 @@
+name: validate-manifest
+
+# Structural validation of manifest.json — the contract the huligan-sdk resolver
+# reads. Runs on any change to the manifest or the tools that produce it, so a
+# malformed entry (bad asset name, sha256, min_conf_schema, dangling latest) is
+# caught before it can break clients.
+
+on:
+  pull_request:
+    paths:
+      - "manifest.json"
+      - "tools/**"
+      - ".github/workflows/validate-manifest.yml"
+  push:
+    branches: [main]
+    paths:
+      - "manifest.json"
+      - "tools/**"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate manifest schema
+        run: python tools/validate_manifest.py --manifest manifest.json
+      - name: Run tool tests
+        run: python -m pytest tools/test_manifest_tools.py -q
