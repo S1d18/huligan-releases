@@ -6,6 +6,7 @@
     "147.0.7727.56": {
       "tag": "v147.0.7727.56",
       "released": "2026-04-22",
+      "min_conf_schema": 1,
       "win64": {
         "asset": "huligan-chrome-147.0.7727.56-win64.zip",
         "size": 186082410,
@@ -15,6 +16,7 @@
     "148.0.7778.97": {
       "tag": "v148.0.7778.97",
       "released": "2026-05-18",
+      "min_conf_schema": 1,
       "win64": {
         "asset": "huligan-chrome-148.0.7778.97-win64.zip",
         "size": 189984276,
@@ -24,6 +26,7 @@
     "149.0.7827.54": {
       "tag": "v149.0.7827.54",
       "released": "2026-06-08",
+      "min_conf_schema": 1,
       "win64": {
         "asset": "huligan-chrome-149.0.7827.54-win64.zip",
         "size": 190444542,
@@ -33,6 +36,7 @@
     "150.0.7871.101": {
       "tag": "v150.0.7871.101",
       "released": "2026-07-10",
+      "min_conf_schema": 1,
       "win64": {
         "asset": "huligan-chrome-150.0.7871.101-win64.zip",
         "size": 194193762,
