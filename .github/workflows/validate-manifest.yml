@@ -25,6 +25,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Install test dependencies
+        # The runner image has no pytest; without this every run failed with
+        # "No module named pytest" (red since the workflow was added).
+        run: python -m pip install pytest
       - name: Validate manifest schema
         run: python tools/validate_manifest.py --manifest manifest.json
       - name: Run tool tests
