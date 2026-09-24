@@ -88,6 +88,50 @@ def test_bool_min_conf_schema_rejected():
     assert any("min_conf_schema" in e for e in vm.validate_manifest(m))
 
 
+def _with_version_key(key):
+    """Good manifest whose single version is keyed `key` (tag/asset kept consistent)."""
+    m = _good_manifest()
+    entry = m["versions"].pop("150.0.7871.101")
+    entry["tag"] = f"v{key}"
+    entry["win64"]["asset"] = f"huligan-chrome-{key}-win64.zip"
+    m["versions"][key] = entry
+    m["latest"] = key
+    return m
+
+
+@pytest.mark.parametrize("key", ["150", "150.0.7871", "v150.0.7871.101", "150.0.7871.101-beta",
+                                 "150.0.7871.x", "150.0.7871.101\n", "150..7871.101"])
+def test_malformed_version_key_flagged(key):
+    errors = vm.validate_manifest(_with_version_key(key))
+    assert any("X.Y.Z.W" in e for e in errors), errors
+
+
+def test_channels_pointing_at_published_versions_pass():
+    m = _good_manifest()
+    m["channels"] = {"stable": "150.0.7871.101", "latest": "150.0.7871.101", "beta": None}
+    assert vm.validate_manifest(m) == []
+
+
+def test_dangling_channel_flagged():
+    m = _good_manifest()
+    m["channels"] = {"stable": "150.0.7871.101", "latest": "151.0.0.0"}
+    errors = vm.validate_manifest(m)
+    assert any("channels.latest" in e for e in errors)
+    assert not any("channels.stable" in e for e in errors)
+
+
+def test_channels_must_be_object():
+    m = _good_manifest()
+    m["channels"] = ["150.0.7871.101"]
+    assert any("'channels'" in e for e in vm.validate_manifest(m))
+
+
+def test_non_string_channel_target_flagged():
+    m = _good_manifest()
+    m["channels"] = {"stable": 150}
+    assert any("channels.stable" in e for e in vm.validate_manifest(m))
+
+
 # --- publish --------------------------------------------------------------
 
 @pytest.fixture

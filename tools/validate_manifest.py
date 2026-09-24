@@ -21,6 +21,10 @@ from pathlib import Path
 
 ASSET_TEMPLATE = "huligan-chrome-{version}-win64.zip"
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+# Full four-part Chrome version, e.g. 152.0.7977.65. The SDK builds the tag,
+# asset name and cache dir from it; "152" or "v152.0.7977.65" would pass every
+# other check here and still resolve to nothing.
+VERSION_RE = re.compile(r"^\d+\.\d+\.\d+\.\d+$")
 _REQUIRED_TOP = ("schema_version", "latest", "platforms", "versions")
 
 
@@ -44,8 +48,25 @@ def validate_manifest(data: dict) -> list:
     if latest is not None and latest not in versions:
         errors.append(f"'latest' {latest!r} is not present in versions")
 
+    # Optional channel map (the SDK resolver prefers channels[<name>] over
+    # 'latest'): every non-empty value must name a published version, or a
+    # client on that channel resolves to a build that does not exist.
+    channels = data.get("channels")
+    if channels is not None:
+        if not isinstance(channels, dict):
+            errors.append("'channels' must be an object")
+        else:
+            for name, target in channels.items():
+                if not target:
+                    continue  # empty = SDK falls back to 'latest'
+                if not isinstance(target, str) or target not in versions:
+                    errors.append(f"channels.{name} {target!r} is not present in versions")
+
     for ver, entry in versions.items():
         loc = f"versions.{ver}"
+        if not isinstance(ver, str) or not VERSION_RE.fullmatch(ver):
+            errors.append(f"{loc}: version must be X.Y.Z.W (digits), got {ver!r}")
+
         if not isinstance(entry, dict):
             errors.append(f"{loc} must be an object")
             continue
