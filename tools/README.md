@@ -19,6 +19,10 @@ python tools/publish.py 151.0.7900.1 --set-latest --commit
 
 - **sha256 must match the uploaded asset** — the SDK verifies the download
   against it. Compute from the same file you upload.
+- The input must be a ZIP with `chrome.exe` at the root or under one top-level
+  folder. A version already in the manifest with a **different** sha256 is
+  refused: a rebuilt binary gets a new version (re-running with the same zip,
+  e.g. only to `--set-latest`, is fine).
 - `latest` moves **only** with `--set-latest`. Farms/checkers on the `latest`
   channel never pick up an unvalidated build.
 - `min_conf_schema` defaults to the current max. Pass `--min-conf-schema N` only

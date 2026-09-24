@@ -30,8 +30,10 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import subprocess
 import sys
+import zipfile
 from datetime import date
 from pathlib import Path
 
@@ -39,6 +41,7 @@ from pathlib import Path
 from validate_manifest import ASSET_TEMPLATE, validate_manifest
 
 _EMPTY_MANIFEST = {"schema_version": 1, "latest": None, "platforms": ["win64"], "versions": {}}
+_TOP_CHROME_RE = re.compile(r"[^/]+/chrome\.exe")
 
 
 def sha256_of(path: Path) -> str:
@@ -47,6 +50,23 @@ def sha256_of(path: Path) -> str:
         for buf in iter(lambda: fh.read(1024 * 1024), b""):
             h.update(buf)
     return h.hexdigest()
+
+
+def check_zip(zip_path: Path) -> None:
+    """Refuse anything that is not a Chrome package the SDK can install.
+
+    The SDK extracts the asset and then looks for ``chrome.exe`` at the root
+    (after lifting a single top-level folder), so accept ``chrome.exe`` or
+    ``<folder>/chrome.exe``. Raises ValueError otherwise.
+    """
+    if not zipfile.is_zipfile(zip_path):
+        raise ValueError(f"refusing to publish {zip_path}: not a ZIP archive")
+    with zipfile.ZipFile(zip_path) as zf:
+        names = zf.namelist()
+    if not any(n == "chrome.exe" or _TOP_CHROME_RE.fullmatch(n) for n in names):
+        raise ValueError(
+            f"refusing to publish {zip_path}: no chrome.exe at the archive root "
+            f"or under a single top-level folder")
 
 
 def carry_min_conf_schema(manifest: dict) -> int:
@@ -86,18 +106,34 @@ def publish(
     released=None,
 ) -> dict:
     """Return the updated manifest dict (does not write). Raises on invalid result."""
+    check_zip(zip_path)
+
     if manifest_path.exists():
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     else:
-        manifest = dict(_EMPTY_MANIFEST)
+        manifest = json.loads(json.dumps(_EMPTY_MANIFEST))  # deep copy: never mutate the template
 
     if min_conf_schema is None:
         min_conf_schema = carry_min_conf_schema(manifest)
     if released is None:
         released = date.today().isoformat()
 
-    manifest.setdefault("versions", {})[version] = build_entry(
-        version, zip_path, min_conf_schema, released)
+    entry = build_entry(version, zip_path, min_conf_schema, released)
+
+    # A published version is immutable: clients that already installed it
+    # verified THAT sha256 and never re-download. Re-running with the same zip
+    # (e.g. just to --set-latest) is fine; different bytes need a new version.
+    existing = manifest.get("versions", {}).get(version)
+    if isinstance(existing, dict):
+        old_sha = (existing.get("win64") or {}).get("sha256")
+        new_sha = entry["win64"]["sha256"]
+        if old_sha and old_sha != new_sha:
+            raise ValueError(
+                f"refusing to overwrite {version}: it is already published with sha256 "
+                f"{old_sha[:12]}..., this zip is {new_sha[:12]}... — a new build must get "
+                f"a new version")
+
+    manifest.setdefault("versions", {})[version] = entry
     if set_latest:
         manifest["latest"] = version
 

@@ -216,6 +216,65 @@ def test_cli_writes_manifest(tmp_path, fake_zip):
     assert vm.validate_manifest(data) == []
 
 
+def test_publish_rejects_non_zip(tmp_path):
+    fake = tmp_path / "huligan-chrome-151.0.7900.1-win64.zip"
+    fake.write_bytes(b"this is not a zip")
+    with pytest.raises(ValueError, match="not a ZIP"):
+        publish.publish("151.0.7900.1", fake, tmp_path / "manifest.json",
+                        set_latest=False, released="2026-07-20")
+
+
+def test_publish_rejects_zip_without_chrome_exe(tmp_path):
+    z = tmp_path / "huligan-chrome-151.0.7900.1-win64.zip"
+    with zipfile.ZipFile(z, "w") as zf:
+        zf.writestr("huligan-chrome-151.0.7900.1/chrome.dll", b"x")
+        zf.writestr("a/b/chrome.exe", b"x")   # too deep: SDK lifts only one folder
+    with pytest.raises(ValueError, match="chrome.exe"):
+        publish.publish("151.0.7900.1", z, tmp_path / "manifest.json",
+                        set_latest=False, released="2026-07-20")
+
+
+def test_publish_accepts_chrome_exe_under_top_folder(tmp_path):
+    z = tmp_path / "huligan-chrome-151.0.7900.1-win64.zip"
+    with zipfile.ZipFile(z, "w") as zf:
+        zf.writestr("huligan-chrome-151.0.7900.1/chrome.exe", b"x")  # real packager layout
+    out = publish.publish("151.0.7900.1", z, tmp_path / "manifest.json",
+                          set_latest=True, released="2026-07-20")
+    assert out["latest"] == "151.0.7900.1"
+
+
+def test_publish_refuses_different_sha_for_existing_version(tmp_path, fake_zip):
+    mpath = tmp_path / "manifest.json"
+    mpath.write_text(json.dumps(_good_manifest()), encoding="utf-8")  # 150 has sha "a"*64
+    rebuilt = tmp_path / "huligan-chrome-150.0.7871.101-win64.zip"
+    rebuilt.write_bytes(fake_zip.read_bytes())
+    with pytest.raises(ValueError, match="new version"):
+        publish.publish("150.0.7871.101", rebuilt, mpath,
+                        set_latest=False, released="2026-07-20")
+
+
+def test_publish_same_zip_again_is_idempotent(tmp_path, fake_zip):
+    mpath = tmp_path / "manifest.json"
+    mpath.write_text(json.dumps(_good_manifest()), encoding="utf-8")
+    first = publish.publish("151.0.7900.1", fake_zip, mpath,
+                            set_latest=False, released="2026-07-20")
+    mpath.write_text(json.dumps(first), encoding="utf-8")
+    again = publish.publish("151.0.7900.1", fake_zip, mpath,
+                            set_latest=True, released="2026-07-20")  # e.g. just promoting
+    assert again["versions"]["151.0.7900.1"] == first["versions"]["151.0.7900.1"]
+    assert again["latest"] == "151.0.7900.1"
+
+
+def test_cli_refuses_overwrite_and_leaves_manifest(tmp_path, fake_zip, capsys):
+    mpath = tmp_path / "manifest.json"
+    mpath.write_text(json.dumps(_good_manifest()), encoding="utf-8")
+    before = mpath.read_text(encoding="utf-8")
+    rc = publish.main(["150.0.7871.101", "--zip", str(fake_zip), "--manifest", str(mpath)])
+    assert rc == 1
+    assert mpath.read_text(encoding="utf-8") == before
+    assert "new version" in capsys.readouterr().err
+
+
 def test_cli_missing_zip_errors(tmp_path, capsys):
     mpath = tmp_path / "manifest.json"
     mpath.write_text(json.dumps(_good_manifest()), encoding="utf-8")
