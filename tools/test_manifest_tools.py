@@ -14,6 +14,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parent))
 
+import evidence  # noqa: E402
 import publish  # noqa: E402
 import validate_manifest as vm  # noqa: E402
 
@@ -142,6 +143,24 @@ def fake_zip(tmp_path):
     return z
 
 
+def _write_evidence(root, version, zip_path, **overrides):
+    """A passing evidence file for ``zip_path`` at <root>/evidence/<version>.json."""
+    ev = {
+        "version": version,
+        "zip_sha256": hashlib.sha256(Path(zip_path).read_bytes()).hexdigest(),
+        "browserscan_score": 100,
+        "creepjs_lies": 0,
+        "ja4_matches_stock": True,
+        "tested_at": "2026-07-20",
+        "notes": "test fixture",
+    }
+    ev.update(overrides)
+    path = Path(root) / "evidence" / f"{version}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(ev), encoding="utf-8")
+    return path
+
+
 def test_sha256_of_matches_hashlib(fake_zip):
     expected = hashlib.sha256(fake_zip.read_bytes()).hexdigest()
     assert publish.sha256_of(fake_zip) == expected
@@ -172,6 +191,7 @@ def test_publish_carries_min_conf_schema(tmp_path, fake_zip):
     m["versions"]["150.0.7871.101"]["min_conf_schema"] = 3
     mpath = tmp_path / "manifest.json"
     mpath.write_text(json.dumps(m), encoding="utf-8")
+    _write_evidence(tmp_path, "151.0.7900.1", fake_zip)
 
     out = publish.publish("151.0.7900.1", fake_zip, mpath,
                           set_latest=True, released="2026-07-20")
@@ -181,6 +201,7 @@ def test_publish_carries_min_conf_schema(tmp_path, fake_zip):
 
 def test_publish_from_empty_manifest(tmp_path, fake_zip):
     mpath = tmp_path / "manifest.json"  # does not exist
+    _write_evidence(tmp_path, "151.0.7900.1", fake_zip)
     out = publish.publish("151.0.7900.1", fake_zip, mpath,
                           set_latest=True, released="2026-07-20")
     assert out["latest"] == "151.0.7900.1"
@@ -205,6 +226,7 @@ def test_cli_dry_run_writes_nothing(tmp_path, fake_zip, capsys):
 def test_cli_writes_manifest(tmp_path, fake_zip):
     mpath = tmp_path / "manifest.json"
     mpath.write_text(json.dumps(_good_manifest()), encoding="utf-8")
+    _write_evidence(tmp_path, "151.0.7900.1", fake_zip)
 
     rc = publish.main([
         "151.0.7900.1", "--zip", str(fake_zip), "--set-latest",
@@ -238,6 +260,7 @@ def test_publish_accepts_chrome_exe_under_top_folder(tmp_path):
     z = tmp_path / "huligan-chrome-151.0.7900.1-win64.zip"
     with zipfile.ZipFile(z, "w") as zf:
         zf.writestr("huligan-chrome-151.0.7900.1/chrome.exe", b"x")  # real packager layout
+    _write_evidence(tmp_path, "151.0.7900.1", z)
     out = publish.publish("151.0.7900.1", z, tmp_path / "manifest.json",
                           set_latest=True, released="2026-07-20")
     assert out["latest"] == "151.0.7900.1"
@@ -259,6 +282,7 @@ def test_publish_same_zip_again_is_idempotent(tmp_path, fake_zip):
     first = publish.publish("151.0.7900.1", fake_zip, mpath,
                             set_latest=False, released="2026-07-20")
     mpath.write_text(json.dumps(first), encoding="utf-8")
+    _write_evidence(tmp_path, "151.0.7900.1", fake_zip)
     again = publish.publish("151.0.7900.1", fake_zip, mpath,
                             set_latest=True, released="2026-07-20")  # e.g. just promoting
     assert again["versions"]["151.0.7900.1"] == first["versions"]["151.0.7900.1"]
@@ -283,3 +307,153 @@ def test_cli_missing_zip_errors(tmp_path, capsys):
         "--manifest", str(mpath),
     ])
     assert rc == 1
+
+
+# --- release evidence gate -------------------------------------------------
+
+EXAMPLE = Path(__file__).resolve().parents[1] / "docs" / "evidence.example.json"
+
+
+def _ev(**overrides):
+    ev = {"version": "151.0.7900.1", "zip_sha256": "b" * 64, "browserscan_score": 97,
+          "creepjs_lies": 0, "ja4_matches_stock": True, "tested_at": "2026-07-20",
+          "notes": ""}
+    ev.update(overrides)
+    return ev
+
+
+def test_evidence_at_thresholds_passes():
+    assert evidence.validate_evidence(_ev(), "151.0.7900.1", "b" * 64) == []
+    assert evidence.validate_evidence(_ev(tested_at="2026-07-20T14:03:00+03:00"),
+                                      "151.0.7900.1", "b" * 64) == []
+
+
+@pytest.mark.parametrize("overrides,needle", [
+    ({"browserscan_score": 96.9}, "browserscan_score"),
+    ({"browserscan_score": "100"}, "browserscan_score"),
+    ({"browserscan_score": True}, "browserscan_score"),
+    ({"browserscan_score": None}, "browserscan_score"),
+    ({"creepjs_lies": 1}, "creepjs_lies"),
+    ({"creepjs_lies": 0.0}, "creepjs_lies"),
+    ({"creepjs_lies": False}, "creepjs_lies"),
+    ({"ja4_matches_stock": False}, "ja4_matches_stock"),
+    ({"ja4_matches_stock": "true"}, "ja4_matches_stock"),
+    ({"tested_at": "21.09.2026"}, "tested_at"),
+    ({"tested_at": None}, "tested_at"),
+    ({"notes": None}, "notes"),
+    ({"version": "151.0.7900.2"}, "version"),
+    ({"zip_sha256": "c" * 64}, "does not match"),
+    ({"zip_sha256": "B" * 64}, "lowercase hex"),
+])
+def test_evidence_rejects(overrides, needle):
+    errors = evidence.validate_evidence(_ev(**overrides), "151.0.7900.1", "b" * 64)
+    assert any(needle in e for e in errors), errors
+
+
+@pytest.mark.parametrize("field", evidence.REQUIRED_FIELDS)
+def test_evidence_every_field_is_required(field):
+    ev = _ev()
+    del ev[field]
+    errors = evidence.validate_evidence(ev, "151.0.7900.1", "b" * 64)
+    assert any(field in e for e in errors), errors
+
+
+def test_evidence_thresholds_are_the_gate():
+    assert evidence.MIN_BROWSERSCAN_SCORE == 97
+    assert evidence.MAX_CREEPJS_LIES == 0
+
+
+def test_example_evidence_is_well_formed():
+    ex = json.loads(EXAMPLE.read_text(encoding="utf-8"))
+    assert set(evidence.REQUIRED_FIELDS) <= set(ex)
+    # Bound to its own placeholder version/sha, never to a real published build.
+    assert ex["version"] not in json.loads(REPO_MANIFEST.read_text(encoding="utf-8"))["versions"]
+    assert evidence.validate_evidence(ex, ex["version"], ex["zip_sha256"]) == []
+
+
+def test_set_latest_without_evidence_is_refused(tmp_path, fake_zip):
+    mpath = tmp_path / "manifest.json"
+    mpath.write_text(json.dumps(_good_manifest()), encoding="utf-8")
+    with pytest.raises(ValueError, match="no evidence file"):
+        publish.publish("151.0.7900.1", fake_zip, mpath,
+                        set_latest=True, released="2026-07-20")
+
+
+def test_set_latest_with_failing_evidence_is_refused(tmp_path, fake_zip):
+    mpath = tmp_path / "manifest.json"
+    mpath.write_text(json.dumps(_good_manifest()), encoding="utf-8")
+    _write_evidence(tmp_path, "151.0.7900.1", fake_zip, creepjs_lies=2)
+    with pytest.raises(ValueError, match="creepjs_lies"):
+        publish.publish("151.0.7900.1", fake_zip, mpath,
+                        set_latest=True, released="2026-07-20")
+
+
+def test_set_latest_with_evidence_for_other_bytes_is_refused(tmp_path, fake_zip):
+    mpath = tmp_path / "manifest.json"
+    mpath.write_text(json.dumps(_good_manifest()), encoding="utf-8")
+    _write_evidence(tmp_path, "151.0.7900.1", fake_zip, zip_sha256="d" * 64)
+    with pytest.raises(ValueError, match="different bytes"):
+        publish.publish("151.0.7900.1", fake_zip, mpath,
+                        set_latest=True, released="2026-07-20")
+
+
+def test_set_latest_with_evidence_for_other_version_is_refused(tmp_path, fake_zip):
+    mpath = tmp_path / "manifest.json"
+    mpath.write_text(json.dumps(_good_manifest()), encoding="utf-8")
+    ev = _write_evidence(tmp_path, "151.0.7900.1", fake_zip)
+    ev.write_text(ev.read_text(encoding="utf-8").replace('"version": "151.0.7900.1"',
+                                                         '"version": "151.0.7900.9"'),
+                  encoding="utf-8")
+    with pytest.raises(ValueError, match="version is '151.0.7900.9'"):
+        publish.publish("151.0.7900.1", fake_zip, mpath, set_latest=True,
+                        released="2026-07-20", evidence_file=ev)
+
+
+def test_cli_set_latest_refused_leaves_manifest(tmp_path, fake_zip, capsys):
+    mpath = tmp_path / "manifest.json"
+    mpath.write_text(json.dumps(_good_manifest()), encoding="utf-8")
+    before = mpath.read_text(encoding="utf-8")
+    rc = publish.main(["151.0.7900.1", "--zip", str(fake_zip), "--set-latest",
+                       "--manifest", str(mpath)])
+    assert rc == 1
+    assert mpath.read_text(encoding="utf-8") == before
+    assert "refusing --set-latest" in capsys.readouterr().err
+
+
+def test_cli_explicit_evidence_path(tmp_path, fake_zip):
+    mpath = tmp_path / "manifest.json"
+    mpath.write_text(json.dumps(_good_manifest()), encoding="utf-8")
+    ev = _write_evidence(tmp_path / "elsewhere", "151.0.7900.1", fake_zip)
+    rc = publish.main(["151.0.7900.1", "--zip", str(fake_zip), "--set-latest",
+                       "--manifest", str(mpath), "--evidence", str(ev)])
+    assert rc == 0
+    assert json.loads(mpath.read_text(encoding="utf-8"))["latest"] == "151.0.7900.1"
+
+
+def test_cli_without_set_latest_warns_but_publishes(tmp_path, fake_zip, capsys):
+    mpath = tmp_path / "manifest.json"
+    mpath.write_text(json.dumps(_good_manifest()), encoding="utf-8")
+    rc = publish.main(["151.0.7900.1", "--zip", str(fake_zip), "--manifest", str(mpath)])
+    assert rc == 0
+    data = json.loads(mpath.read_text(encoding="utf-8"))
+    assert "151.0.7900.1" in data["versions"]
+    assert data["latest"] == "150.0.7871.101"
+    assert "WARNING" in capsys.readouterr().err
+
+
+def test_cli_without_set_latest_and_valid_evidence_is_quiet(tmp_path, fake_zip, capsys):
+    mpath = tmp_path / "manifest.json"
+    mpath.write_text(json.dumps(_good_manifest()), encoding="utf-8")
+    _write_evidence(tmp_path, "151.0.7900.1", fake_zip)
+    assert publish.main(["151.0.7900.1", "--zip", str(fake_zip), "--manifest", str(mpath)]) == 0
+    assert "WARNING" not in capsys.readouterr().err
+
+
+def test_evidence_cli_uses_manifest_sha(tmp_path, fake_zip):
+    mpath = tmp_path / "manifest.json"
+    mpath.write_text(json.dumps(_good_manifest()), encoding="utf-8")   # 150 has sha "a"*64
+    ev = _write_evidence(tmp_path, "150.0.7871.101", fake_zip, zip_sha256="a" * 64)
+    assert evidence.main(["150.0.7871.101", "--manifest", str(mpath)]) == 0
+    ev.write_text(ev.read_text(encoding="utf-8").replace("a" * 64, "e" * 64), encoding="utf-8")
+    assert evidence.main(["150.0.7871.101", "--manifest", str(mpath)]) == 1
+    assert evidence.main(["999.0.0.0", "--manifest", str(mpath)]) == 1   # not published

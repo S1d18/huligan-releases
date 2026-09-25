@@ -10,12 +10,16 @@ on:
     paths:
       - "manifest.json"
       - "tools/**"
+      - "evidence/**"
+      - "docs/evidence.example.json"
       - ".github/workflows/validate-manifest.yml"
   push:
     branches: [main]
     paths:
       - "manifest.json"
       - "tools/**"
+      - "evidence/**"
+      - "docs/evidence.example.json"
 
 jobs:
   validate:

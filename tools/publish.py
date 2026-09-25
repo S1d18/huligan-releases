@@ -14,6 +14,12 @@ The manifest ``latest`` only moves when you pass ``--set-latest`` — publishing
 entry does not silently promote it, so farms on the ``latest`` channel never pick
 up an unvalidated build.
 
+``--set-latest`` is GATED: it requires ``evidence/{version}.json`` (see
+``tools/evidence.py``) whose ``zip_sha256`` equals the sha256 of the ZIP being
+published and whose results pass the validation gate (BrowserScan >= 97,
+CreepJS lies 0, JA4 == stock). Without ``--set-latest`` the entry is still
+written, with a warning if that evidence is missing or invalid.
+
 Examples:
     # add the entry but do NOT promote it yet
     python tools/publish.py 151.0.7900.1 --zip ../builds/huligan-chrome-151.0.7900.1-win64.zip
@@ -38,6 +44,7 @@ from datetime import date
 from pathlib import Path
 
 # Sibling import (Python puts the script's dir on sys.path[0]).
+from evidence import check_evidence_file, evidence_path
 from validate_manifest import ASSET_TEMPLATE, validate_manifest
 
 _EMPTY_MANIFEST = {"schema_version": 1, "latest": None, "platforms": ["win64"], "versions": {}}
@@ -96,6 +103,13 @@ def build_entry(version: str, zip_path: Path, min_conf_schema: int, released: st
     }
 
 
+def default_evidence_file(version: str, manifest_path: Path, override=None) -> Path:
+    """``override`` if given, else ``evidence/<version>.json`` beside the manifest."""
+    if override is not None:
+        return Path(override)
+    return evidence_path(version, Path(manifest_path).resolve().parent)
+
+
 def publish(
     version: str,
     zip_path: Path,
@@ -104,8 +118,13 @@ def publish(
     set_latest: bool,
     min_conf_schema=None,
     released=None,
+    evidence_file=None,
 ) -> dict:
-    """Return the updated manifest dict (does not write). Raises on invalid result."""
+    """Return the updated manifest dict (does not write). Raises on invalid result.
+
+    With ``set_latest`` the evidence file (default ``evidence/<version>.json``
+    next to the manifest) must admit this exact ZIP, else ValueError.
+    """
     check_zip(zip_path)
 
     if manifest_path.exists():
@@ -133,6 +152,16 @@ def publish(
                 f"{old_sha[:12]}..., this zip is {new_sha[:12]}... — a new build must get "
                 f"a new version")
 
+    if set_latest:
+        ev_file = default_evidence_file(version, manifest_path, evidence_file)
+        problems = check_evidence_file(ev_file, version, entry["win64"]["sha256"])
+        if problems:
+            raise ValueError(
+                f"refusing --set-latest for {version}: no valid release evidence\n"
+                + "\n".join(f"  - {p}" for p in problems)
+                + "\n  (fill evidence/<version>.json after the validation gate; "
+                  "see tools/README.md)")
+
     manifest.setdefault("versions", {})[version] = entry
     if set_latest:
         manifest["latest"] = version
@@ -157,6 +186,9 @@ def main(argv=None) -> int:
                          "(default: carry forward the current max)")
     ap.add_argument("--released", default=None, help="YYYY-MM-DD (default: today)")
     ap.add_argument("--manifest", default="manifest.json")
+    ap.add_argument("--evidence", default=None,
+                    help="release evidence JSON (default: evidence/{version}.json next "
+                         "to the manifest); required and validated for --set-latest")
     ap.add_argument("--commit", action="store_true", help="git add + commit the manifest")
     ap.add_argument("--dry-run", action="store_true", help="print the result, write nothing")
     args = ap.parse_args(argv)
@@ -173,10 +205,21 @@ def main(argv=None) -> int:
             set_latest=args.set_latest,
             min_conf_schema=args.min_conf_schema,
             released=args.released,
+            evidence_file=args.evidence,
         )
     except ValueError as exc:
         print(str(exc), file=sys.stderr)
         return 1
+
+    if not args.set_latest:
+        ev_file = default_evidence_file(args.version, manifest_path, args.evidence)
+        problems = check_evidence_file(
+            ev_file, args.version, manifest["versions"][args.version]["win64"]["sha256"])
+        if problems:
+            print(f"WARNING: {args.version} has no valid release evidence — publishing the "
+                  f"entry anyway (latest is NOT moved); --set-latest will be refused until "
+                  f"it is fixed:\n" + "\n".join(f"  - {p}" for p in problems),
+                  file=sys.stderr)
 
     text = json.dumps(manifest, indent=2) + "\n"
     if args.dry_run:
@@ -190,7 +233,11 @@ def main(argv=None) -> int:
     print(f"  latest: {'-> ' + args.version if args.set_latest else 'unchanged'}")
 
     if args.commit:
-        subprocess.run(["git", "add", str(manifest_path)], check=True)
+        to_add = [str(manifest_path)]
+        if args.set_latest and args.evidence is None:
+            # the gate passed: the in-repo evidence belongs in the same commit
+            to_add.append(str(default_evidence_file(args.version, manifest_path)))
+        subprocess.run(["git", "add", *to_add], check=True)
         msg = f"manifest: publish Chrome {args.version}"
         if args.set_latest:
             msg += " (latest)"

@@ -1,0 +1,9 @@
+{
+  "version": "999.0.0.0",
+  "zip_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "browserscan_score": 100,
+  "creepjs_lies": 0,
+  "ja4_matches_stock": true,
+  "tested_at": "2026-01-01",
+  "notes": "EXAMPLE ONLY - not a real build. Copy to evidence/<version>.json after the validation gate. zip_sha256 = sha256 of the exact ZIP uploaded to release v<version>. browserscan_score / creepjs_lies = the operator's VISUAL read of a headed window (real proxy; CreepJS with --cdp-port 0), not the CDP scraper. ja4_matches_stock = JA4 equals branded stock Chrome of the same major. Point to the этап4_validation_gate.md run log."
+}
