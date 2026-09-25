@@ -67,6 +67,14 @@ change. Versions published before the gate existed have no evidence; promoting
 one of them back to `latest` (rollback) needs an evidence file written from its
 recorded validation run.
 
+**Rollback.** `--set-latest --rollback` moves `latest` back to a version that is
+*already* in the manifest with the same ZIP sha256, without evidence (builds
+published before the gate have none). Any other bytes still need evidence.
+
+```bash
+python tools/publish.py 152.0.7977.65 --zip builds/huligan-chrome-152.0.7977.65-win64.zip --set-latest --rollback --commit
+```
+
 ## Validate
 
 ```bash

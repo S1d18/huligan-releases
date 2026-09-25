@@ -119,11 +119,17 @@ def publish(
     min_conf_schema=None,
     released=None,
     evidence_file=None,
+    rollback: bool = False,
 ) -> dict:
     """Return the updated manifest dict (does not write). Raises on invalid result.
 
     With ``set_latest`` the evidence file (default ``evidence/<version>.json``
     next to the manifest) must admit this exact ZIP, else ValueError.
+
+    ``rollback`` waives the evidence requirement ONLY for a version already in
+    the manifest with the same sha256 - i.e. moving ``latest`` back to a build
+    that was published before (possibly before the gate existed). New bytes
+    never pass without evidence.
     """
     check_zip(zip_path)
 
@@ -152,7 +158,14 @@ def publish(
                 f"{old_sha[:12]}..., this zip is {new_sha[:12]}... — a new build must get "
                 f"a new version")
 
-    if set_latest:
+    if rollback and not set_latest:
+        raise ValueError("--rollback only makes sense with --set-latest")
+    if rollback and not (isinstance(existing, dict)
+                         and (existing.get("win64") or {}).get("sha256") == entry["win64"]["sha256"]):
+        raise ValueError(
+            f"refusing --rollback to {version}: it is not already published with this exact "
+            f"zip — a rollback may only move latest to a previously published build")
+    if set_latest and not rollback:
         ev_file = default_evidence_file(version, manifest_path, evidence_file)
         problems = check_evidence_file(ev_file, version, entry["win64"]["sha256"])
         if problems:
@@ -189,6 +202,9 @@ def main(argv=None) -> int:
     ap.add_argument("--evidence", default=None,
                     help="release evidence JSON (default: evidence/{version}.json next "
                          "to the manifest); required and validated for --set-latest")
+    ap.add_argument("--rollback", action="store_true",
+                    help="with --set-latest: move latest back to an ALREADY published version "
+                         "(same zip sha256) without requiring release evidence")
     ap.add_argument("--commit", action="store_true", help="git add + commit the manifest")
     ap.add_argument("--dry-run", action="store_true", help="print the result, write nothing")
     args = ap.parse_args(argv)
@@ -206,6 +222,7 @@ def main(argv=None) -> int:
             min_conf_schema=args.min_conf_schema,
             released=args.released,
             evidence_file=args.evidence,
+            rollback=args.rollback,
         )
     except ValueError as exc:
         print(str(exc), file=sys.stderr)
@@ -234,13 +251,13 @@ def main(argv=None) -> int:
 
     if args.commit:
         to_add = [str(manifest_path)]
-        if args.set_latest and args.evidence is None:
+        if args.set_latest and args.evidence is None and not args.rollback:
             # the gate passed: the in-repo evidence belongs in the same commit
             to_add.append(str(default_evidence_file(args.version, manifest_path)))
         subprocess.run(["git", "add", *to_add], check=True)
         msg = f"manifest: publish Chrome {args.version}"
         if args.set_latest:
-            msg += " (latest)"
+            msg += " (latest, rollback)" if args.rollback else " (latest)"
         subprocess.run(["git", "commit", "-m", msg], check=True)
         print("Committed.")
     return 0

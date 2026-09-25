@@ -457,3 +457,35 @@ def test_evidence_cli_uses_manifest_sha(tmp_path, fake_zip):
     ev.write_text(ev.read_text(encoding="utf-8").replace("a" * 64, "e" * 64), encoding="utf-8")
     assert evidence.main(["150.0.7871.101", "--manifest", str(mpath)]) == 1
     assert evidence.main(["999.0.0.0", "--manifest", str(mpath)]) == 1   # not published
+
+
+# --- rollback: move latest back to an already published build ------------------
+
+
+def test_rollback_to_published_build_needs_no_evidence(tmp_path, fake_zip):
+    mp = tmp_path / "manifest.json"
+    m = publish.publish("151.0.7900.1", fake_zip, mp, set_latest=False, released="2026-07-20")
+    mp.write_text(json.dumps(m))
+    # no evidence/151.0.7900.1.json exists (pre-gate build)
+    m2 = publish.publish("151.0.7900.1", fake_zip, mp, set_latest=True, rollback=True,
+                         released="2026-07-20")
+    assert m2["latest"] == "151.0.7900.1"
+
+
+def test_rollback_refuses_unpublished_or_different_bytes(tmp_path, fake_zip):
+    mp = tmp_path / "manifest.json"
+    with pytest.raises(ValueError, match="rollback"):
+        publish.publish("151.0.7900.1", fake_zip, mp, set_latest=True, rollback=True)
+    m = publish.publish("151.0.7900.1", fake_zip, mp, set_latest=False, released="2026-07-20")
+    mp.write_text(json.dumps(m))
+    other = tmp_path / "other.zip"
+    with zipfile.ZipFile(other, "w") as zf:
+        zf.writestr("chrome.exe", b"different-bytes")
+    with pytest.raises(ValueError):
+        publish.publish("151.0.7900.1", other, mp, set_latest=True, rollback=True)
+
+
+def test_rollback_requires_set_latest(tmp_path, fake_zip):
+    with pytest.raises(ValueError, match="--set-latest"):
+        publish.publish("151.0.7900.1", fake_zip, tmp_path / "m.json",
+                        set_latest=False, rollback=True)
