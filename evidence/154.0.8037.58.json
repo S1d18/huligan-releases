@@ -1,0 +1,9 @@
+{
+  "version": "154.0.8037.58",
+  "zip_sha256": "39d0d3669f3037416818d0876d137d74c7cd58deb27921380d1516f579875c84",
+  "browserscan_score": 100,
+  "creepjs_lies": 0,
+  "ja4_matches_stock": true,
+  "tested_at": "2026-09-26",
+  "notes": "Operator visual read, headed, build 154.0.8037.58 rebuilt 2026-09-26 with the whole-line profile_reader.h fix (browser 6d21c98; chrome.dll sha256 6b4f94a3...). BrowserScan 100% through a real SOCKS5 proxy (exit Riga) on a freshly SDK-generated Win32 profile; CreepJS lies 0. JA4 t13d1518h2_8daaf6152771_e2d80978ab2e x3 stable = pinned stock baseline. test_all_patches 0/52 FAIL; WebRTC srflx 0 via SOCKS with the --webrtc-ip-handling-policy switch. Run log: huligan-browser/upgrade/current/154.0.8037.58/этап4_validation_gate.md."
+}
