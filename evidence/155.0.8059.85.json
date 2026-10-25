@@ -1,0 +1,9 @@
+{
+  "version": "155.0.8059.85",
+  "zip_sha256": "e50b7d9dab3614ad882a79deb477cf5b98d7e82c049947f4d0b15fc26c071239",
+  "browserscan_score": 100,
+  "creepjs_lies": 0,
+  "ja4_matches_stock": true,
+  "tested_at": "2026-10-25",
+  "notes": "Operator visual: BrowserScan 100% (headed, real proxy), canvas noise v3 no tampering; CreepJS clean after WebGL2 int64 coherence fix (35377/35379). JA4 t13d1517h2/t13d1518h2 = stock 154 branded. Run log: huligan-browser/upgrade/current/155.0.8059.85/этап4_validation_gate.md"
+}
