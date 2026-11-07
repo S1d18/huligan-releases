@@ -6,13 +6,15 @@ It records the operator's validation of ONE exact ZIP (bound by sha256), so the
 ``latest`` channel can only move to a build that was actually checked — not to
 "a build of that version" and not to a rebuild nobody looked at.
 
-Required fields (extra fields are allowed and ignored)::
+Required fields (extra fields are allowed and ignored); ``browserscan_score`` and
+``creepjs_lies`` are OPTIONAL since 2026-11-07 (operator's decision: the visual
+check is recorded in ``notes`` instead of as numbers), but checked when present::
 
     {
       "version": "154.0.8037.58",          # must equal the version being published
       "zip_sha256": "<64 lowercase hex>",  # must equal sha256 of the ZIP being published
-      "browserscan_score": 100,            # number, >= MIN_BROWSERSCAN_SCORE (headed, real proxy)
-      "creepjs_lies": 0,                   # int, must be <= MAX_CREEPJS_LIES (i.e. 0)
+      "browserscan_score": 100,            # optional; number, >= MIN_BROWSERSCAN_SCORE
+      "creepjs_lies": 0,                   # optional; int, must be <= MAX_CREEPJS_LIES (i.e. 0)
       "ja4_matches_stock": true,           # JA4 equals branded stock Chrome of the same major
       "tested_at": "2026-09-21",           # ISO date (or ISO datetime)
       "notes": "..."                       # free text: who/where/how, links to the этап4 log
@@ -42,9 +44,10 @@ MIN_BROWSERSCAN_SCORE = 97
 MAX_CREEPJS_LIES = 0
 
 REQUIRED_FIELDS = (
-    "version", "zip_sha256", "browserscan_score", "creepjs_lies",
-    "ja4_matches_stock", "tested_at", "notes",
+    "version", "zip_sha256", "ja4_matches_stock", "tested_at", "notes",
 )
+# Checked against the thresholds when present, not required (operator, 2026-11-07).
+OPTIONAL_FIELDS = ("browserscan_score", "creepjs_lies")
 
 _SHA_RE = re.compile(r"[0-9a-f]{64}")
 

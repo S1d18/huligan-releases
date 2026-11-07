@@ -44,15 +44,16 @@ Required fields (validator: `tools/evidence.py:validate_evidence`; example:
 |---|---|
 | `version` | equals the version being published |
 | `zip_sha256` | 64 lowercase hex, equals sha256 of the `--zip` being published |
-| `browserscan_score` | number, **≥ 97** (operator's visual read, headed, real proxy) |
-| `creepjs_lies` | integer, **must be 0** (headed, `--cdp-port 0`) |
+| `browserscan_score` | optional since 2026-11-07; if present: number, **≥ 97** (operator's visual read, headed, real proxy) |
+| `creepjs_lies` | optional since 2026-11-07; if present: integer, **must be 0** (headed, `--cdp-port 0`) |
 | `ja4_matches_stock` | `true` — JA4 equals branded stock Chrome of the same major |
 | `tested_at` | ISO date `YYYY-MM-DD` (or ISO datetime) |
 | `notes` | string — who/how, link to the `этап4_validation_gate.md` run log |
 
 Thresholds are the project's validation gate (BrowserScan ≥ 97 %, CreepJS
-lies 0). The numbers must come from the operator's **visual** read of a headed
-window — the CDP scraper reports false 100 %. Never write evidence for a build
+lies 0). Since 2026-11-07 the operator's visual check may be recorded in `notes`
+instead of as numbers; numbers that are written must come from the operator's
+**visual** read of a headed window — the CDP scraper reports false 100 %. Never write evidence for a build
 nobody validated; a rebuilt ZIP (new sha) needs new evidence.
 
 ```bash

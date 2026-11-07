@@ -358,6 +358,13 @@ def test_evidence_every_field_is_required(field):
     assert any(field in e for e in errors), errors
 
 
+@pytest.mark.parametrize("field", evidence.OPTIONAL_FIELDS)
+def test_evidence_scores_are_optional(field):
+    ev = _ev()
+    del ev[field]
+    assert evidence.validate_evidence(ev, "151.0.7900.1", "b" * 64) == []
+
+
 def test_evidence_thresholds_are_the_gate():
     assert evidence.MIN_BROWSERSCAN_SCORE == 97
     assert evidence.MAX_CREEPJS_LIES == 0
