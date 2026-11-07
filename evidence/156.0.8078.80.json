@@ -1,0 +1,7 @@
+{
+  "version": "156.0.8078.80",
+  "zip_sha256": "2e4c41abe981c2816445f0b68f32098ee2265b46d68d8ca91cb61072764c4ab2",
+  "ja4_matches_stock": true,
+  "tested_at": "2026-11-07",
+  "notes": "Operator visual check of the headed SDK launch (scripts/gate_launch.py, real socks5 proxy), build of 14:53: operator said all OK and asked to publish; BrowserScan score and CreepJS lies were not recorded as numbers (operator decision 2026-11-07, those fields became optional). Objective, headless vs branded stock 156.0.8078.81: JA4 fresh t13d1517h2_8daaf6152771_cb7bf5808d99 and resumed t13d1518h2_8daaf6152771_e2d80978ab2e, Akamai H2, GREASE Not:A-Brand/8, CSS/window/navigator/WebGPU surfaces all equal (measured on the first 156 build; later rebuilds changed only patch 08 XBV and patch 11b WebRTC). Final build: XBV HAPBDMyaoKMvznMB+peRDdWq7go= equals stock, pytest -m slow 5 passed incl. 11b. Run log: huligan-browser/upgrade/current/156.0.8078.80/этап4_validation_gate.md"
+}
