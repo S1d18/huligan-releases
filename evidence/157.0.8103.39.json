@@ -1,0 +1,7 @@
+{
+  "version": "157.0.8103.39",
+  "zip_sha256": "5f8e21664276d7d24960cd22e187cdb72c46900a66bf12239dbb9ab5134eb6e8",
+  "ja4_matches_stock": true,
+  "tested_at": "2026-11-10",
+  "notes": "Operator visual check of the headed SDK launch (scripts/gate_launch.py, real socks5 proxy), build of 2026-11-10 08:10: operator said all OK (\"давай все отлично\"); no BrowserScan/CreepJS numbers recorded (operator decision 2026-11-07). Target chosen by rollout share: group 156 on 2026-11-09 = 157.0.8103.39 49.5%, .40 24.75%, .50 24.75%. Objective, headless vs branded stock 157.0.8103.50: JA4 fresh t13d1517h2_8daaf6152771_cb7bf5808d99 and resumed t13d1518h2_8daaf6152771_e2d80978ab2e, Akamai H2, GREASE Not-A.Brand/99 (GREASE -> Google Chrome -> Chromium), Navigator 70 / globals 1279, all x-browser-* headers equal stock (XBV vGjLma4mn+g9XuVNp7FgWs5AqhY= measured; copyright casing 'All Rights Reserved.' fixed this cycle). pytest -m slow 5 passed; test_all_patches dolphin_anty_reference + windows_gaming all passed. Run log: huligan-browser/upgrade/current/157.0.8103.39/этап4_validation_gate.md"
+}

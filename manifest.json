@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "latest": "156.0.8078.80",
+  "latest": "157.0.8103.39",
   "platforms": [
     "win64"
   ],
@@ -93,6 +93,16 @@
         "asset": "huligan-chrome-156.0.8078.80-win64.zip",
         "size": 208832206,
         "sha256": "2e4c41abe981c2816445f0b68f32098ee2265b46d68d8ca91cb61072764c4ab2"
+      }
+    },
+    "157.0.8103.39": {
+      "tag": "v157.0.8103.39",
+      "released": "2026-11-10",
+      "min_conf_schema": 2,
+      "win64": {
+        "asset": "huligan-chrome-157.0.8103.39-win64.zip",
+        "size": 210510678,
+        "sha256": "5f8e21664276d7d24960cd22e187cdb72c46900a66bf12239dbb9ab5134eb6e8"
       }
     }
   }
