@@ -1,0 +1,7 @@
+{
+  "version": "158.0.8127.89",
+  "zip_sha256": "9e09ce935a74e041167b23a38401744176c6217dca600935c48e0fc62ce156aa",
+  "ja4_matches_stock": true,
+  "tested_at": "2026-11-24",
+  "notes": "Operator visual check of the headed SDK launch (scripts/gate_launch.py, real socks5 proxy) on 2026-11-24: BrowserScan, CreepJS (no red hashes) and browserleaks WebRTC; operator said all OK (\"да все отлично\"); no BrowserScan/CreepJS numbers recorded (operator decision 2026-11-07). Objective, vs branded stock 158.0.8127.89 from Google's update server (sha256 = server hash, Authenticode valid, unpacked, never installed): tools/fpreport 0 failing / 188 equal, JA4 resumed t13d1518h2_8daaf6152771_e2d80978ab2e, Akamai H2 1:65536;2:0;4:6291456;6:262144|15663105|0|m,a,s,p, sec-ch-ua Chromium;158 / Not.A/Brand;24 / Google Chrome;158, x-browser-validation P62Xs4/NjYN1l1Xrg+4c0RLTy4I= (measured) and the other x-browser-* headers equal stock, canvas hash equal (Graphite on in 158), window.chrome keys app/csi/loadTimes as stock (chrome.runtime absent). pytest -m slow 39 passed, 1 skipped (run separately with the shipped 157 binary: passed); test_webrtc_synth (11b): mDNS host, srflx = webrtc_local_ipv4. Run log: huligan-browser/upgrade/current/158.0.8127.89/этап4_validation_gate.md"
+}
